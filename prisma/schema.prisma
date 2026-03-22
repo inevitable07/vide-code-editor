@@ -23,7 +23,7 @@ model User {
   name  String?
   email String @unique
 
-  imageUrl String?
+  image String?
   accounts Account[]
   role UserRole @default(USER)
 

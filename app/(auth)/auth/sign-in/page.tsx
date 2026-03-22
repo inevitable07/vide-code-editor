@@ -2,7 +2,7 @@ import SignInFormClient from '@/modules/auth/components/sign-in-form-client'
 import Image from 'next/image'
 // import React from 'react'
 
-export const page = () => {
+const page = () => {
   return (
     <>
     <Image  src={"/login.svg"} alt='Login-Image' width={300} height={300} className='m-6 object-cover'/>

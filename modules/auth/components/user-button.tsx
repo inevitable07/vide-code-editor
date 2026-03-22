@@ -10,21 +10,32 @@ import {
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
-import { LogOut, User } from "lucide-react";
+import { LogOut, User, Loader2 } from "lucide-react";
 import LogoutButton from "./logout-button";
 import { useCurrentUser } from "../hooks/use-current-user";
 
 const UserButton = () => {
+  const { user, status } = useCurrentUser();
 
-  const user = useCurrentUser()
+  if (status === "loading") {
+    return (
+      <div className="relative rounded-full">
+        <Avatar>
+          <AvatarFallback className="bg-gray-300 animate-pulse">
+            <Loader2 className="h-4 w-4 animate-spin text-gray-500" />
+          </AvatarFallback>
+        </Avatar>
+      </div>
+    );
+  }
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger>
         <div className={cn("relative rounded-full")}>
           <Avatar>
-            <AvatarImage src={user?.image!} alt={user?.name!} />
-            <AvatarFallback className="bg-red-500">
+            <AvatarImage src={user?.image || ""} alt={user?.name || ""} />
+            <AvatarFallback className="bg-red-500" delayMs={600}>
               <User className="text-white" />
             </AvatarFallback>
           </Avatar>

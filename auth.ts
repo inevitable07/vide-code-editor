@@ -3,18 +3,14 @@ import { PrismaAdapter } from "@auth/prisma-adapter"
 
 import authConfig from "./auth.config"
 import { prisma } from "./lib/db";
-import { getAccountByUserId, getUserById } from "./modules/auth/actions";
+import { getUserByEmail } from "./modules/auth/actions";
 
-
- 
-
- 
 export const { auth, handlers, signIn, signOut } = NextAuth({
   callbacks: {
     async signIn({ user, account}) {
       if (!user || !account) return false;
 
-      
+
       const existingUser = await prisma.user.findUnique({
         where: { email: user.email! },
       });
@@ -24,10 +20,9 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
           data: {
             email: user.email!,
             name: user.name,
-            imageUrl: user.image,
-           
+            image: user.image,
+
             accounts: {
-              // @ts-ignore
               create: {
                 type: account.type,
                 provider: account.provider,
@@ -38,15 +33,24 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
                 tokenType: account.token_type,
                 scope: account.scope,
                 idToken: account.id_token,
-                sessionState: account.session_state,
+                sessionState: account.session_state?.toString(),
               },
             },
           },
         });
 
         if (!newUser) return false;
-        } 
+        }
         else {
+            // Update existing user with fresh OAuth data
+            await prisma.user.update({
+              where: { email: user.email! },
+              data: {
+                name: user.name,
+                image: user.image,
+              },
+            });
+
             const existingAccount = await prisma.account.findUnique({
             where: {
                 provider_providerAccountId: {
@@ -68,8 +72,7 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
                     tokenType: account.token_type,
                     scope: account.scope,
                     idToken: account.id_token,
-                    // @ts-ignore
-                    sessionState: account.session_state,
+                    sessionState: account.session_state?.toString(),
                     },
                 });
             }
@@ -77,31 +80,50 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
       return true;
     },
 
-    async jwt({ token}) {
-      if(!token.sub) return token;
-      const existingUser = await getUserById(token.sub)
+    async jwt({ token, user, trigger }) {
+        if (user) {
+            token.name = user.name;
+            token.email = user.email;
+            token.image = user.image;
 
-      if(!existingUser) return token;
+            if (user.email) {
+                const dbUser = await getUserByEmail(user.email);
+                if (dbUser) {
+                    token.name = dbUser.name;
+                    token.email = dbUser.email;
+                    token.image = dbUser.image;
+                    token.role = dbUser.role;
+                    token.id = dbUser.id;
+                }
+            }
+            return token;
+        }
 
-      const exisitingAccount = await getAccountByUserId(existingUser.id);
+        // On subsequent requests, refresh from DB
+        if (token.email) {
+            const dbUser = await getUserByEmail(token.email as string);
 
-      token.name = existingUser.name;
-      token.email = existingUser.email;
-      token.role = existingUser.role;
+            if (dbUser) {
+                token.name = dbUser.name;
+                token.email = dbUser.email;
+                token.image = dbUser.image;
+                token.role = dbUser.role;
+                token.id = dbUser.id;
+            }
+        }
 
-      return token;
+        return token;
     },
 
     async session({ session, token }) {
-    if(token.sub  && session.user){
-      session.user.id = token.sub
-    } 
-
-    if(token.sub && session.user){
-      session.user.role = token.role
-    }
-
-    return session;
+      if(session.user){
+        session.user.id = (token.id as string) || token.sub || "";
+        session.user.role = token.role;
+        session.user.name = token.name as string;
+        session.user.email = token.email as string;
+        session.user.image = token.image as string;
+      }
+      return session;
     },
   },
   
@@ -110,5 +132,3 @@ export const { auth, handlers, signIn, signOut } = NextAuth({
   session: { strategy: "jwt" },
   ...authConfig,
 })
-
- 
