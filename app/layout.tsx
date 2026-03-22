@@ -4,6 +4,7 @@ import "./globals.css";
 import { cn } from "@/lib/utils";
 import AuthProvider from "@/modules/auth/components/AuthProvider";
 import { auth } from "@/auth";
+import { ThemeProvider } from "@/components/providers/theme-provider";
 
 const inter = Inter({subsets:['latin'],variable:'--font-sans'});
 
@@ -36,7 +37,14 @@ export default async function RootLayout({
     >
       <body className="min-h-full flex flex-col">
         <AuthProvider session={session}>
-          {children}
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            {children}
+          </ThemeProvider>
         </AuthProvider>
       </body>
     </html>
