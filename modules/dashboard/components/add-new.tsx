@@ -9,9 +9,30 @@ import { useRouter } from "next/navigation";
 import { useState } from "react"
 import { toast } from "sonner";
 import TemplateSelectionModal from "./template-selecting";
+import { set } from "date-fns";
+import { createPlayground } from "../actions";
 
 const AddNewButton = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const router = useRouter();
+  const [seletedTemplate, setSelectedTemplate] = useState<{
+    title:string;
+    template: "REACT" | "VUE" | "ANGULAR" | "HONO" | "EXPRESS" | "NEXTJS";
+    description?:string;
+  } | null>(null);
+
+  const handleSumbit = async(data:{
+    title:string;
+    template: "REACT" | "VUE" | "ANGULAR" | "HONO" | "EXPRESS" | "NEXTJS";
+    description?:string;
+  })=>{
+    setSelectedTemplate(data);
+
+    const res = await createPlayground(data);
+    toast.success("Playground created successfully")
+    setIsModalOpen(false);
+    router.push(`/playground/${res?.id}`)
+  }
 
   return (
     <>
@@ -50,7 +71,7 @@ const AddNewButton = () => {
       <TemplateSelectionModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        onSubmit={()=>{}}
+        onSubmit={handleSumbit}
       />
     </>
   )
