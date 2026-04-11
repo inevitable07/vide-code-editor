@@ -11,6 +11,7 @@ export const getPlaygroundById = async(id:string) =>{
         const playground = await prisma.playground.findUnique({
             where:{id},
             select:{
+                title:true,
                 templateFiles:{
                     select:{
                         content:true
