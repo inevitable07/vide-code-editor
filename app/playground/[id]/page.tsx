@@ -11,10 +11,12 @@ import { Button } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Bot, FileText, Save, Settings, X } from "lucide-react";
 import { useParams } from "next/navigation";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/components/ui/resizable";
 import { PlaygroundEditor } from "@/modules/playground/components/playground-editor";
+import { useWebContainer } from "@/modules/webcontainer/hooks/useWebContainers";
+import WebContainerPreview from "@/modules/webcontainer/components/webContainer-preview";
 
 const MainPlayGround = () => {
   const id = useParams<{ id: string }>();
@@ -42,6 +44,16 @@ const MainPlayGround = () => {
     // handleRenameFolder,
     // updateFileContent
   } = useFileExplorer();
+  const {
+    serverUrl,
+    isLoading: containerLoading,
+    error: containerError,
+    instance,
+    writeFileSync,
+    // @ts-ignore
+  } = useWebContainer({ templateData });
+
+  const lastSyncedContent = useRef<Map<string, string>>(new Map());
 
   useEffect(() => {
     setPlaygroundId(id?.id || "");
@@ -223,7 +235,7 @@ const MainPlayGround = () => {
                         suggestionPosition={aiSuggestions.position}
                         onAcceptSuggestion={(editor , monaco)=>aiSuggestions.acceptSuggestion(editor , monaco)}
 
-                          onRejectSuggestion={(editor) =>
+                        onRejectSuggestion={(editor) =>
                           aiSuggestions.rejectSuggestion(editor)
                         }
                         onTriggerSuggestion={(type, editor) =>
@@ -238,7 +250,7 @@ const MainPlayGround = () => {
                         <ResizablePanel defaultSize={50}>
                           <WebContainerPreview
                             templateData={templateData}
-                            instance={() => {}}
+                            instance={instance}
                             writeFileSync={writeFileSync}
                             isLoading={containerLoading}
                             error={containerError}
