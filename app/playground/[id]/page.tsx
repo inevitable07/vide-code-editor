@@ -44,6 +44,7 @@ const MainPlayGround = () => {
     // handleRenameFolder,
     // updateFileContent
   } = useFileExplorer();
+
   const {
     serverUrl,
     isLoading: containerLoading,
@@ -228,19 +229,18 @@ const MainPlayGround = () => {
                       <PlaygroundEditor
                         activeFile={activeFile}
                         content={activeFile?.content || ""}
-                        onContentChange={() => {}
-                        }
-                        suggestion={aiSuggestions.suggestio}
-                        suggestionLoading={aiSuggestions.isLoading}
-                        suggestionPosition={aiSuggestions.position}
-                        onAcceptSuggestion={(editor , monaco)=>aiSuggestions.acceptSuggestion(editor , monaco)}
+                        onContentChange={() => {}}
+                        // suggestion={aiSuggestions.suggestio}
+                        // suggestionLoading={aiSuggestions.isLoading}
+                        // suggestionPosition={aiSuggestions.position}
+                        // onAcceptSuggestion={(editor , monaco)=>aiSuggestions.acceptSuggestion(editor , monaco)}
 
-                        onRejectSuggestion={(editor) =>
-                          aiSuggestions.rejectSuggestion(editor)
-                        }
-                        onTriggerSuggestion={(type, editor) =>
-                          aiSuggestions.fetchSuggestion(type, editor)
-                        }
+                        // onRejectSuggestion={(editor) =>
+                        //   aiSuggestions.rejectSuggestion(editor)
+                        // }
+                        // onTriggerSuggestion={(type, editor) =>
+                        //   aiSuggestions.fetchSuggestion(type, editor)
+                        // }
                       />
                     </ResizablePanel>
 
