@@ -5,6 +5,7 @@ import { CheckCircle, Loader2, XCircle } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { TemplateFolder } from "@/modules/playground/lib/path-to-json";
 import { WebContainer } from "@webcontainer/api";
+import TerminalComponent from "./terminal";
 
 
 interface WebContainerPreviewProps {
@@ -39,7 +40,26 @@ const WebContainerPreview = ({
   const [setupError, setSetupError] = useState<string | null>(null);
   const [isSetupComplete, setIsSetupComplete] = useState(false);
   const [isSetupInProgress, setIsSetupInProgress] = useState(false);
+
     const terminalRef = useRef<any>(null);
+
+    useEffect(() => {
+        if (forceResetup) {
+            setIsSetupComplete(false);
+            setIsSetupInProgress(false);
+            setPreviewUrl("");
+            setCurrentStep(0);
+            setLoadingState({
+                transforming: false,
+                mounting: false,
+                installing: false,
+                starting: false,
+                ready: false,
+            });
+        }
+    }, [forceResetup]);
+
+    
     useEffect(() => {
         async function setupContainer() {
         if (!instance || isSetupComplete || isSetupInProgress) return;
@@ -317,12 +337,12 @@ const WebContainerPreview = ({
 
           {/* Terminal */}
           <div className="flex-1 p-4">
-            {/* <TerminalComponent
+            <TerminalComponent
               ref={terminalRef}
               webContainerInstance={instance}
               theme="dark"
               className="h-full"
-            /> */}
+            /> 
           </div>
         </div>
       ) : (
@@ -336,12 +356,12 @@ const WebContainerPreview = ({
           </div>
 
           <div className="h-64 border-t">
-            {/* <TerminalComponent
+            <TerminalComponent
               ref={terminalRef}
               webContainerInstance={instance}
               theme="dark"
               className="h-full"
-            /> */}
+            />
           </div>
         </div>
       )}
